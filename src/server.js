@@ -4,6 +4,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger');
 const app = express();
 const { Agent } = require('./agent');
+const { ensureFocusedRequest } = require('./middleware/ensureFocusedRequest');
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
