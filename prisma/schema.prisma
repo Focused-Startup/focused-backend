@@ -1,0 +1,149 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id        Int      @id @default(autoincrement()) @map("user_id")
+  email     String   @unique
+  password  String
+  username  String
+  firstName String?  @map("first_name")
+  lastName  String?  @map("last_name")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  notes                     Note[]
+  questions                 Question[]
+  responses                 Response[]
+  goals                     Goal[]
+  relationshipsAsUser       UserRelationship[]       @relation("RelationshipUser")
+  relationshipsAsTarget     UserRelationship[]       @relation("RelationshipTarget")
+  relationshipsAsActionUser UserRelationship[]       @relation("RelationshipActionUser")
+  canvasUsers               CanvasUserRelationship[]
+  canvas                    Canvas[]
+
+  @@map("users")
+}
+
+model UserRelationship {
+  userId       Int                @map("user_id")
+  targetUserId Int                @map("target_user_id")
+  status       RelationshipStatus @default(pending)
+  actionUserId Int                @map("action_user_id")
+  createdAt    DateTime           @default(now()) @map("created_at")
+
+  user       User @relation("RelationshipUser", fields: [userId], references: [id])
+  targetUser User @relation("RelationshipTarget", fields: [targetUserId], references: [id])
+  actionUser User @relation("RelationshipActionUser", fields: [actionUserId], references: [id])
+
+  @@id([userId, targetUserId])
+  @@map("user_relationships")
+}
+
+model Note {
+  id        Int      @id @default(autoincrement()) @map("note_id")
+  authorId  Int      @map("note_user_id")
+  canvasId  Int?     @map("canvas_id")
+  content   String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  author User    @relation(fields: [authorId], references: [id])
+  canvas Canvas? @relation(fields: [canvasId], references: [id])
+
+  @@map("notes")
+}
+
+model Canvas {
+  id          Int              @id @default(autoincrement()) @map("canvas_id")
+  ownerId     Int              @map("canvas_user_id")
+  visibility  CanvasVisibility @default(private)
+  drawingData Json             @map("drawing_data")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  owner       User                     @relation(fields: [ownerId], references: [id])
+  notes       Note[]
+  canvasUsers CanvasUserRelationship[]
+
+  @@map("canvas")
+}
+
+model Question {
+  id        Int      @id @default(autoincrement()) @map("question_id")
+  authorId  Int      @map("question_user_id")
+  body      String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  author    User       @relation(fields: [authorId], references: [id])
+  responses Response[]
+
+  @@map("questions")
+}
+
+model Response {
+  id         Int      @id @default(autoincrement()) @map("response_id")
+  questionId Int      @map("response_question_id")
+  authorId   Int      @map("response_user_id")
+  body       String   @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  question Question @relation(fields: [questionId], references: [id])
+  author   User     @relation(fields: [authorId], references: [id])
+
+  @@map("responses")
+}
+
+model CanvasUserRelationship {
+  canvasId Int @map("canvas_id")
+  userId   Int @map("user_id")
+
+  canvas Canvas @relation(fields: [canvasId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@id([canvasId, userId])
+  @@map("canvas_users_relationships")
+}
+
+model Goal {
+  id        Int        @id @default(autoincrement()) @map("goal_id")
+  userId    Int        @map("goal_user_id")
+  content   String?
+  status    GoalStatus @default(active)
+  dueDate   DateTime?  @map("due_date") @db.Date
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("goals")
+}
+
+enum CanvasVisibility {
+  private
+  friends
+  public
+}
+
+enum GoalStatus {
+  active
+  completed
+  deleted
+  archived
+}
+
+enum RelationshipStatus {
+  pending
+  accepted
+  blocked
+}

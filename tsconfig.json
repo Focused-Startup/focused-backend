@@ -1,13 +1,15 @@
 {
+  "include": ["src/**/*"],
   "compilerOptions": {
     "rootDir": "src",
-    "rootDirs": ["src"],
     "outDir": "dist",
     "lib": ["es2023"],
     "target": "es2023",
-    "module": "NodeNext",
-    "moduleResolution": "nodenext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
-    "types": ["node"]
+    "types": ["node"],
+    "strict": true,
+    "ignoreDeprecations": "6.0"
   }
 }
