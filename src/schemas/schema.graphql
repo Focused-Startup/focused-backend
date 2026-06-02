@@ -1,0 +1,245 @@
+scalar DateTime
+scalar JSON
+
+# ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum CanvasVisibility {
+  private
+  friends
+  public
+}
+
+enum GoalStatus {
+  active
+  completed
+  deleted
+  archived
+}
+
+enum RelationshipStatus {
+  pending
+  accepted
+  blocked
+}
+
+# ─── Object Types ─────────────────────────────────────────────────────────────
+
+type User {
+  id: Int!
+  email: String
+  username: String
+  firstName: String
+  lastName: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  notes: [Note]
+  questions: [Question]
+  responses: [Response]
+  goals: [Goal]
+  canvas: [Canvas]
+  relationshipsAsUser: [UserRelationship]
+  relationshipsAsTarget: [UserRelationship]
+}
+
+type UserRelationship {
+  user: User!
+  targetUser: User!
+  status: RelationshipStatus!
+  actionUser: User!
+  createdAt: DateTime!
+}
+
+type Note {
+  id: Int!
+  content: String
+  author: User!
+  canvas: Canvas
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Canvas {
+  id: Int!
+  visibility: CanvasVisibility!
+  drawingData: JSON!
+  owner: User!
+  canvasUsers: [CanvasUserRelationship]
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type CanvasUserRelationship {
+  canvas: Canvas!
+  user: User!
+}
+
+type Question {
+  id: Int!
+  body: String
+  author: User!
+  responses: [Response]
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Response {
+  id: Int!
+  body: String!
+  question: Question!
+  author: User!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Goal {
+  id: Int!
+  content: String
+  status: GoalStatus!
+  dueDate: DateTime
+  user: User!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+# ─── Auth ─────────────────────────────────────────────────────────────────────
+
+type AuthPayload {
+  token: String!
+  user: User!
+}
+
+# ─── Input Types ──────────────────────────────────────────────────────────────
+
+input RegisterInput {
+  email: String!
+  password: String!
+  username: String!
+  firstName: String
+  lastName: String
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input CreateNoteInput {
+  content: String!
+  canvasId: Int
+}
+
+input UpdateNoteInput {
+  content: String!
+}
+
+input CreateCanvasInput {
+  visibility: CanvasVisibility
+  drawingData: JSON!
+}
+
+input UpdateCanvasInput {
+  visibility: CanvasVisibility
+  drawingData: JSON
+}
+
+input CreateQuestionInput {
+  body: String!
+}
+
+input UpdateQuestionInput {
+  body: String!
+}
+
+input CreateResponseInput {
+  questionId: Int!
+  body: String!
+}
+
+input UpdateResponseInput {
+  body: String!
+}
+
+input CreateGoalInput {
+  content: String
+  status: GoalStatus
+  dueDate: DateTime
+}
+
+input UpdateGoalInput {
+  content: String
+  status: GoalStatus
+  dueDate: DateTime
+}
+
+# ─── Queries ──────────────────────────────────────────────────────────────────
+
+type Query {
+  # Auth
+  me: User
+
+  # Users
+  user(id: Int!): User
+  users: [User!]!
+
+  # Notes
+  note(id: Int!): Note
+  notes: [Note!]!
+
+  # Canvases
+  canvas(id: Int!): Canvas
+  canvases: [Canvas!]!
+
+  # Questions
+  question(id: Int!): Question
+  questions: [Question!]!
+
+  # Responses
+  response(id: Int!): Response
+  responses(questionId: Int!): [Response!]!
+
+  # Goals
+  goal(id: Int!): Goal
+  goals: [Goal!]!
+
+  # Relationships
+  userRelationships: [UserRelationship!]!
+}
+
+# ─── Mutations ────────────────────────────────────────────────────────────────
+
+type Mutation {
+  # Auth
+  register(input: RegisterInput!): AuthPayload!
+  login(input: LoginInput!): AuthPayload!
+
+  # Notes
+  createNote(input: CreateNoteInput!): Note!
+  updateNote(id: Int!, input: UpdateNoteInput!): Note!
+  deleteNote(id: Int!): Boolean!
+
+  # Canvases
+  createCanvas(input: CreateCanvasInput!): Canvas!
+  updateCanvas(id: Int!, input: UpdateCanvasInput!): Canvas!
+  deleteCanvas(id: Int!): Boolean!
+  addCanvasUser(canvasId: Int!, userId: Int!): CanvasUserRelationship!
+  removeCanvasUser(canvasId: Int!, userId: Int!): Boolean!
+
+  # Questions
+  createQuestion(input: CreateQuestionInput!): Question!
+  updateQuestion(id: Int!, input: UpdateQuestionInput!): Question!
+  deleteQuestion(id: Int!): Boolean!
+
+  # Responses
+  createResponse(input: CreateResponseInput!): Response!
+  updateResponse(id: Int!, input: UpdateResponseInput!): Response!
+  deleteResponse(id: Int!): Boolean!
+
+  # Goals
+  createGoal(input: CreateGoalInput!): Goal!
+  updateGoal(id: Int!, input: UpdateGoalInput!): Goal!
+  deleteGoal(id: Int!): Boolean!
+
+  # Relationships
+  sendFriendRequest(targetUserId: Int!): UserRelationship!
+  updateRelationshipStatus(targetUserId: Int!, status: RelationshipStatus!): UserRelationship!
+}
