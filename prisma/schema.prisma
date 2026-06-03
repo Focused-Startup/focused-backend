@@ -10,7 +10,7 @@ datasource db {
   provider = "mysql"
 }
 
-model User {
+export model User {
   id        Int      @id @default(autoincrement()) @map("user_id")
   email     String   @unique
   password  String
