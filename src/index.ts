@@ -1,8 +1,8 @@
 import "dotenv/config";
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
-import { typeDefs } from './schemas/index.js';
-import { resolvers } from './resolvers/index.js';
+import { typeDefs } from './schemas/index';
+import { resolvers } from './resolvers/index';
 
 // The ApolloServer constructor requires two parameters: your schema
 // definition and your set of resolvers.

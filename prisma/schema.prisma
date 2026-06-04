@@ -117,7 +117,7 @@ model Goal {
   userId    Int        @map("goal_user_id")
   content   String?
   status    GoalStatus @default(active)
-  dueDate   DateTime?  @map("due_date") @db.Date
+  dueDate   String?    @map("due_date")
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
 
