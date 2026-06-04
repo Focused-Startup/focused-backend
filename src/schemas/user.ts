@@ -10,6 +10,7 @@ export const userTypeDefs = `#graphql
       lastName: String
       createdAt: DateTime!
       updatedAt: DateTime!
+      notes: [Note!]!
     }
 
     type Query {

@@ -10,7 +10,7 @@ datasource db {
   provider = "mysql"
 }
 
-export model User {
+model User {
   id        Int      @id @default(autoincrement()) @map("user_id")
   email     String   @unique
   password  String
@@ -51,13 +51,11 @@ model UserRelationship {
 model Note {
   id        Int      @id @default(autoincrement()) @map("note_id")
   authorId  Int      @map("note_user_id")
-  canvasId  Int?     @map("canvas_id")
   content   String   @db.Text
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   author User    @relation(fields: [authorId], references: [id])
-  canvas Canvas? @relation(fields: [canvasId], references: [id])
 
   @@map("notes")
 }
@@ -71,7 +69,6 @@ model Canvas {
   updatedAt   DateTime         @updatedAt @map("updated_at")
 
   owner       User                     @relation(fields: [ownerId], references: [id])
-  notes       Note[]
   canvasUsers CanvasUserRelationship[]
 
   @@map("canvas")

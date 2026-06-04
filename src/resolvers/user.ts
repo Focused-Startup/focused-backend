@@ -10,6 +10,12 @@ interface Args {
 }
 
 export const UsersResolvers = {
+    User: {
+        // Field resolver: fetches notes for a user only when the `notes` field is queried
+        notes: async (parent: { id: number }) => {
+            return prisma.note.findMany({ where: { authorId: parent.id } });
+        }
+    },
     Query: {
         users: async () => {
             try {
