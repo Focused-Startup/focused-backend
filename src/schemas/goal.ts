@@ -4,7 +4,7 @@ export const goalTypeDefs = `#graphql
       content: String
       status: GoalStatus!
       userId: Int!
-      dueDate: String!
+      dueDate: DateTime!
       createdAt: DateTime!
       updatedAt: DateTime!
     }

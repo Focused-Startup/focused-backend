@@ -4,7 +4,7 @@ interface GoalArgs {
     id: number;
     content: string;
     userId: number;
-    dueDate: string;
+    dueDate: Date;
 }
 
 export const GoalsResolvers = {

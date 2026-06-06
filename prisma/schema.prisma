@@ -26,9 +26,8 @@ model User {
   goals                     Goal[]
   relationshipsAsUser       UserRelationship[]       @relation("RelationshipUser")
   relationshipsAsTarget     UserRelationship[]       @relation("RelationshipTarget")
-  relationshipsAsActionUser UserRelationship[]       @relation("RelationshipActionUser")
-  canvasUsers               CanvasUserRelationship[]
   canvas                    Canvas[]
+  canvasUserRelationship    CanvasUserRelationship[]
 
   @@map("users")
 }
@@ -37,12 +36,10 @@ model UserRelationship {
   userId       Int                @map("user_id")
   targetUserId Int                @map("target_user_id")
   status       RelationshipStatus @default(pending)
-  actionUserId Int                @map("action_user_id")
   createdAt    DateTime           @default(now()) @map("created_at")
 
   user       User @relation("RelationshipUser", fields: [userId], references: [id])
   targetUser User @relation("RelationshipTarget", fields: [targetUserId], references: [id])
-  actionUser User @relation("RelationshipActionUser", fields: [actionUserId], references: [id])
 
   @@id([userId, targetUserId])
   @@map("user_relationships")
@@ -117,7 +114,7 @@ model Goal {
   userId    Int        @map("goal_user_id")
   content   String?
   status    GoalStatus @default(active)
-  dueDate   String?    @map("due_date")
+  dueDate   DateTime   @map("due_date")
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
 
@@ -142,5 +139,6 @@ enum GoalStatus {
 enum RelationshipStatus {
   pending
   accepted
+  rejected
   blocked
 }
