@@ -3,7 +3,7 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
-    "lib": ["es2023"],
+    "lib": ["es2023", "es2018.asynciterable"],
     "target": "es2023",
     "module": "ESNext",
     "moduleResolution": "bundler",

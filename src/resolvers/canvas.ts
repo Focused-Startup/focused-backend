@@ -69,13 +69,14 @@ export const CanvasesResolvers = {
         updateCanvas: async (_: any, args: CanvasArgs) => {
             const { id, visibility, drawingData } = args;
             try {
-                pubsub.publish('CANVAS_UPDATED', { canvasUpdated: { id, visibility, drawingData } });
+                const updatedAt = new Date();
+                pubsub.publish('CANVAS_UPDATED', { canvasUpdated: { id, visibility, drawingData, updatedAt } });
                 return await prisma.canvas.update({
                     where: { id },
                     data: {
                         visibility: visibility || undefined,
                         drawingData: drawingData || undefined,
-                        updatedAt: new Date()
+                        updatedAt: updatedAt
                     }
                 });
             } catch (error) {

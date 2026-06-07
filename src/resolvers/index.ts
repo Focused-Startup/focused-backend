@@ -29,6 +29,9 @@ export const resolvers = {
         ...CanvasUserRelationshipsResolvers.Mutation,
         ...CanvasesResolvers.Mutation,
     },
+    Subscription: {
+        ...CanvasesResolvers.Subscription,
+    },
     User: UsersResolvers.User,
     Question: QuestionsResolvers.Question,
     Canvas: CanvasesResolvers.Canvas,
