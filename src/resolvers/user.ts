@@ -19,16 +19,29 @@ export const UsersResolvers = {
         goals: async (parent: { id: number }) => {
             return prisma.goal.findMany({ where: { userId: parent.id } });
         },
-        // Field resolver: fetches user relationships for a user only when the `userRelationships` field is queried
-        userRelationships: async (parent: { id: number }) => {
+        // Field resolver: fetches user relationships for a user only when the `relationshipsAsUser` field is queried
+        relationshipsAsUser: async (parent: { id: number }) => {
             return prisma.userRelationship.findMany({
                 where: {
-                    OR: [
-                        { userId: parent.id },
-                        { targetUserId: parent.id }
-                    ]
+                    userId: parent.id
                 }
             });
+        },
+        // Field resolver: fetches user relationships for a user only when the `relationshipsAsTarget` field is queried
+        relationshipsAsTarget: async (parent: { id: number }) => {
+            return prisma.userRelationship.findMany({
+                where: {
+                    targetUserId: parent.id
+                }
+            });
+        },
+        // Field resolver: fetches responses for a user only when the `responses` field is queried
+        responses: async (parent: { id: number }) => {
+            return prisma.response.findMany({ where: { authorId: parent.id } });
+        },
+        // Field resolver: fetches questions for a user only when the `questions` field is queried
+        questions: async (parent: { id: number }) => {
+            return prisma.question.findMany({ where: { authorId: parent.id } });
         }
     },
     Query: {

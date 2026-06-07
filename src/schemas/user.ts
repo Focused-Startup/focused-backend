@@ -12,7 +12,10 @@ export const userTypeDefs = `#graphql
       updatedAt: DateTime!
       notes: [Note!]!
       goals: [Goal!]!
-      userRelationships: [UserRelationship!]!
+      relationshipsAsUser: [UserRelationship!]!
+      relationshipsAsTarget: [UserRelationship!]!
+      responses: [Response!]!
+      questions: [Question!]!
     }
 
     type Query {

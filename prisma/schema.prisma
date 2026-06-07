@@ -68,7 +68,7 @@ model Canvas {
   owner       User                     @relation(fields: [ownerId], references: [id])
   canvasUsers CanvasUserRelationship[]
 
-  @@map("canvas")
+  @@map("canvases")
 }
 
 model Question {
