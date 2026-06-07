@@ -7,6 +7,7 @@ import { ResponsesResolvers } from './response';
 import { CanvasUserRelationshipsResolvers } from './canvasUserRelationship';
 import { CanvasesResolvers } from './canvas';
 
+// Datastore logic living in resolver files currently, but could be moved to controllers for scalability.
 export const resolvers = {
     Query: {
         ...UsersResolvers.Query,

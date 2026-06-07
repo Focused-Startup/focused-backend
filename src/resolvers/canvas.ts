@@ -1,4 +1,7 @@
 import prisma from '../db/client';
+import { PubSub, withFilter } from 'graphql-subscriptions';
+
+const pubsub = new PubSub();
 
 interface CanvasArgs {
     id: number;
@@ -66,6 +69,7 @@ export const CanvasesResolvers = {
         updateCanvas: async (_: any, args: CanvasArgs) => {
             const { id, visibility, drawingData } = args;
             try {
+                pubsub.publish('CANVAS_UPDATED', { canvasUpdated: { id, visibility, drawingData } });
                 return await prisma.canvas.update({
                     where: { id },
                     data: {
@@ -87,6 +91,17 @@ export const CanvasesResolvers = {
                 console.error('Error deleting canvas:', error);
                 return { success: false, message: 'Error deleting canvas', id: args.id };
             }
+        }
+    },
+    Subscription: {
+        canvasUpdated: {
+            subscribe: withFilter(
+                () => pubsub.asyncIterableIterator('CANVAS_UPDATED'),
+                (payload, variables) => {
+                    // Add your filtering logic here if needed
+                    return payload.canvasUpdated.id === variables.canvasId;
+                }
+            )
         }
     }
 }

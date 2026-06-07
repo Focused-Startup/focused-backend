@@ -1,3 +1,4 @@
+import 'dotenv/config';
 // npm install @apollo/server @as-integrations/express5 express graphql cors
 import { ApolloServer } from '@apollo/server';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
@@ -22,11 +23,11 @@ const schema = makeExecutableSchema({ typeDefs, resolvers });
 
 // Creating the WebSocket server
 const wsServer = new WebSocketServer({
-  // This is the `httpServer` we created in a previous step.
   server: httpServer,
-  // Pass a different path here if app.use
-  // serves expressMiddleware at a different path
-  path: '/subscriptions',
+  // Same path as the HTTP GraphQL endpoint so clients only need one URL.
+  // Node.js routes WS upgrades and regular HTTP requests separately,
+  // so there is no conflict with the Express middleware on '/'.
+  path: '/',
 });
 // Hand in the schema we just created and have the
 // WebSocketServer start listening.
