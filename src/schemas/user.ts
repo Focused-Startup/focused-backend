@@ -20,7 +20,7 @@ export const userTypeDefs = `#graphql
 
     type Query {
         users: usersInfoResponse
-        user(id: Int!): User
+        user(id: Int, email: String, username: String): User
     }
 
     type usersInfoResponse {

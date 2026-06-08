@@ -55,11 +55,19 @@ export const UsersResolvers = {
             }
         },
         user: async (_ : any, args: Args) => {
-            const { id } = args;
+            const { id, email, username } = args;
             try {
-                return await prisma.user.findUnique({ where: { id } });
+                if (id) {
+                    return await prisma.user.findUnique({ where: { id } });
+                } else if (email) {
+                    return await prisma.user.findUnique({ where: { email } });
+                } else if (username) {
+                    return await prisma.user.findUnique({ where: { username } });
+                } else {
+                    return null;
+                }
             } catch (error) {
-                console.error(`Error fetching user with id ${id}:`, error);
+                console.error(`Error fetching user with id ${id}, email ${email}, or username ${username}:`, error);
                 return null;
             }
         }
