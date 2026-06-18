@@ -19,6 +19,12 @@ const app = express();
 // enabling our servers to shut down gracefully.
 const httpServer = createServer(app);
 
+const corsOptions: cors.CorsOptions = {
+  origin: '*',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  allowedHeaders: 'Content-Type, Authorization',
+};
+
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 
 // Creating the WebSocket server
@@ -58,7 +64,7 @@ await server.start();
 // and our expressMiddleware function.
 app.use(
   '/',
-  cors<cors.CorsRequest>(),
+  cors<cors.CorsRequest>(corsOptions),
   express.json(),
   // expressMiddleware accepts the same arguments:
   // an Apollo Server instance and optional configuration options
@@ -69,4 +75,4 @@ app.use(
 await new Promise<void>((resolve) =>
   httpServer.listen({ port: process.env.PORT }, resolve),
 );
-console.log(`🚀 Server ready at http://localhost:${process.env.PORT}/`);
+console.log(`🚀 Server ready to serve!`);

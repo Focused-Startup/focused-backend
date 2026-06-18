@@ -4,8 +4,8 @@ import { PubSub, withFilter } from 'graphql-subscriptions';
 const pubsub = new PubSub();
 
 interface CanvasArgs {
-    id: number;
-    ownerId: number;
+    id?: number;
+    ownerId?: number;
     visibility: 'private' | 'friends' | 'public';
     drawingData: any; // Assuming JSON type for drawing data
 }
@@ -41,7 +41,13 @@ export const CanvasesResolvers = {
         },
         canvas: async (_: any, args: CanvasArgs) => {
             try {
-                return await prisma.canvas.findUnique({ where: { id: args.id } });
+                if (args.id) {
+                    return await prisma.canvas.findUnique({ where: { id: args.id } });
+                } else if (args.ownerId) {
+                    return await prisma.canvas.findFirst({ where: { ownerId: args.ownerId } });
+                } else {
+                    return null;
+                }
             } catch (error) {
                 console.error('Error fetching canvas:', error);
                 return null;
@@ -54,7 +60,7 @@ export const CanvasesResolvers = {
             try {
                 return await prisma.canvas.create({
                     data: {
-                        ownerId: ownerId,
+                        ownerId: ownerId as number,
                         visibility: visibility,
                         drawingData: drawingData,
                         createdAt: new Date(),
