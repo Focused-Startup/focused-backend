@@ -21,12 +21,12 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-      
-      - name: Generate prismaclient
-        run: npx prisma generate
 
       - name: Install dependencies
         run: npm ci
+      
+      - name: Generate prismaclient
+        run: npx prisma generate
 
       - name: Build
         run: npm run build
