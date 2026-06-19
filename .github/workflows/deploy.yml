@@ -17,9 +17,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6.1.0
         with:
-          role-to-assume: arn:aws:iam::979404690153:user/jimmy_owner
+          role-to-assume: arn:aws:iam::979404690153:role/github-elasticbeanstalk
           aws-region: us-east-2
 
       - name: Deploy to Elastic Beanstalk
