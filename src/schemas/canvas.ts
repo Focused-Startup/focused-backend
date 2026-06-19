@@ -18,7 +18,7 @@ export const canvasTypeDefs = `#graphql
 
     type Query {
         canvases: CanvasesInfoResponse
-        canvas(id?: Int!, ownerId?: Int!): Canvas
+        canvas(id: Int, ownerId: Int): Canvas
     }
 
     type CanvasesInfoResponse {
