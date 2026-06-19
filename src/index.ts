@@ -20,7 +20,9 @@ const app = express();
 const httpServer = createServer(app);
 
 const corsOptions: cors.CorsOptions = {
-  origin: '*',
+  origin: ['https://studio.apollographql.com', 
+    'exp+focused-startup://expo-development-client/?url=http%3A%2F%2F192.168.1.42%3A8081',
+  ],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   allowedHeaders: 'Content-Type, Authorization',
 };
