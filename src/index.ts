@@ -1,5 +1,4 @@
 import 'dotenv/config';
-// npm install @apollo/server @as-integrations/express5 express graphql cors
 import { ApolloServer } from '@apollo/server';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { expressMiddleware } from '@as-integrations/express5';
@@ -19,12 +18,23 @@ const app = express();
 // enabling our servers to shut down gracefully.
 const httpServer = createServer(app);
 
+// Allowed origins are defined in the ALLOWED_ORIGINS env var as a comma-separated list.
+// Example: ALLOWED_ORIGINS=https://studio.apollographql.com,https://yourapp.com
+const allowedOrigins = (process.env.ALLOWED_ORIGINS ?? '')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
 const corsOptions: cors.CorsOptions = {
-  origin: ['https://studio.apollographql.com', 
-    'exp+focused-startup://expo-development-client/?url=http%3A%2F%2F192.168.1.42%3A8081',
-  ],
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  allowedHeaders: 'Content-Type, Authorization',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. mobile clients, curl, server-to-server)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS: origin '${origin}' is not allowed`));
+  },
+  methods: ['GET', 'POST'],           // GraphQL only needs GET (introspection) + POST
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
 };
 
 const schema = makeExecutableSchema({ typeDefs, resolvers });
