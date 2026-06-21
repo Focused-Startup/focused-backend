@@ -20,7 +20,7 @@ type User {
 
 type Query {
   users: usersInfoResponse
-  user(id: Int!): User
+  user(id: Int, email: String, username: String): User
   notes: notesInfoResponse
   note(id: Int!): Note
   goals: GoalsInfoResponse!
@@ -32,7 +32,7 @@ type Query {
   response(id: Int!): Response
   canvasUserRelationships(canvasId: Int!): CanvasUserRelationshipsResponse
   canvases: CanvasesInfoResponse
-  canvas(id: Int!): Canvas
+  canvas(id: Int, ownerId: Int): Canvas
 }
 
 type usersInfoResponse {

@@ -32,6 +32,9 @@ jobs:
       - name: Generate prismaclient
         run: npx prisma generate
 
+      - name: Generate schema types
+        run: npm run schema:print
+
       - name: Build
         run: npm run build
 
