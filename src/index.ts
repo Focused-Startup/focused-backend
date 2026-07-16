@@ -37,6 +37,15 @@ const corsOptions: cors.CorsOptions = {
   credentials: true,
 };
 
+// When running locally, skip the allow-list entirely and reflect back
+// whatever origin made the request so any local client/port can connect.
+const localCorsOptions: cors.CorsOptions = {
+  origin: true,
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+};
+
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 
 // Creating the WebSocket server
@@ -76,7 +85,7 @@ await server.start();
 // and our expressMiddleware function.
 app.use(
   '/',
-  cors<cors.CorsRequest>(corsOptions),
+  cors<cors.CorsRequest>(process.env.LOCAL ? localCorsOptions : corsOptions),
   express.json(),
   // expressMiddleware accepts the same arguments:
   // an Apollo Server instance and optional configuration options

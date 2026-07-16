@@ -52,13 +52,17 @@ npx prisma generate
 npx prisma migrate deploy
 ```
 
+### 6. Build the app
+
+```bash
+npm run build
+```
+
 ### 6. Start the server
 
 ```bash
 npm run start
 ```
-
-The GraphQL API will be available at **http://localhost:4000**.
 
 ## Local Database (Docker)
 
@@ -93,25 +97,7 @@ DATABASE_HOST="127.0.0.1"
 DATABASE_PORT=3306
 ```
 
-### 3. Apply the Prisma schema and verify connectivity
-
-From the project root:
-
-```bash
-npx prisma generate
-npx prisma db push
-```
-
-`db push` applies `prisma/schema.prisma` directly to the local database (no
-migration files needed for local dev) and will fail loudly if the backend
-can't connect — that's your connectivity check. You can also confirm
-visually with:
-
-```bash
-npx prisma studio
-```
-
-### 4. Seed mock data
+### 3. Seed mock data
 
 Once connectivity is confirmed, seed the local database with mock users,
 notes, questions, responses, and goals:
