@@ -4,7 +4,6 @@ interface Args {
     id: number;
     username: string;
     email: string;
-    password: string;
     firstName: string;
     lastName: string;
 }
@@ -74,13 +73,12 @@ export const UsersResolvers = {
     },
     Mutation: {
         regUser: async (_: any, args: Args) => {
-            const { username, email, password } = args;
+            const { username, email } = args;
             try {
                 return await prisma.user.create({
                     data: {
                         username,
                         email,
-                        password,
                         createdAt: new Date(),
                         updatedAt: new Date()
                     }
@@ -91,10 +89,10 @@ export const UsersResolvers = {
             }
         },
         loginUser: async (_: any, args: Args) => {
-            const { email, password } = args;
+            const { email } = args;
             try {
                 const user = await prisma.user.findUnique({ where: { email } });
-                if (user && user.password === password) {
+                if (user) {
                     return user;
                 } else {
                     return null;
@@ -105,14 +103,13 @@ export const UsersResolvers = {
             }
         },
         updateUser: async (_: any, args: Args) => {
-            const { id, username, email, password, firstName, lastName } = args;
+            const { id, username, email, firstName, lastName } = args;
             try {
                 return await prisma.user.update({
                     where: { id },
                     data: {
                         username,
                         email,
-                        password,
                         firstName,
                         lastName,
                         updatedAt: new Date()

@@ -4,21 +4,18 @@
 export const users = [
   {
     email: "alice@example.com",
-    password: "password123",
     username: "alice",
     firstName: "Alice",
     lastName: "Anderson",
   },
   {
     email: "bob@example.com",
-    password: "password123",
     username: "bob",
     firstName: "Bob",
     lastName: "Brown",
   },
   {
     email: "carol@example.com",
-    password: "password123",
     username: "carol",
     firstName: "Carol",
     lastName: "Carter",
