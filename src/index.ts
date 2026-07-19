@@ -94,6 +94,6 @@ app.use(
 
 // Modified server startup
 await new Promise<void>((resolve) =>
-  httpServer.listen({ port: process.env.PORT }, resolve),
+  httpServer.listen({ port: process.env.PORT || 4000 }, resolve),
 );
 console.log(`🚀 Server ready to serve!`);
