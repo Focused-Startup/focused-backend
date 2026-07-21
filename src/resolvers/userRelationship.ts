@@ -20,8 +20,8 @@ export const UserRelationshipResolvers = {
                     }
                 });
             } catch (error) {
-                console.error(error);
-                throw new Error('Failed to fetch user relationships');
+                console.error('Failed to fetch user relationships', error);
+                return [];
             }
         }
     },
@@ -37,8 +37,8 @@ export const UserRelationshipResolvers = {
                     }
                 });
             } catch (error) {
-                console.error(error);
-                throw new Error('Failed to send friend request');
+                console.error('Failed to send friend request', error);
+                return null;
             }
         },
         respondToFriendRequest: async (_: any, args: Args) => {
@@ -68,8 +68,8 @@ export const UserRelationshipResolvers = {
                     });
                 }
             } catch (error) {
-                console.error(error);
-                throw new Error('Failed to respond to friend request');
+                console.error('Failed to respond to friend request', error);
+                return null;
             }
         },
         removeFriend: async (_: any, args: Args) => {
@@ -85,8 +85,8 @@ export const UserRelationshipResolvers = {
                 });
                 return true;
             } catch (error) {
-                console.error(error);
-                throw new Error('Failed to remove friend');
+                console.error('Failed to remove friend', error);
+                return null;
             }
         },
         blockUser: async (_: any, args: Args) => {
@@ -104,8 +104,8 @@ export const UserRelationshipResolvers = {
                 });
                 return true;
             } catch (error) {
-                console.error(error);
-                throw new Error('Failed to block user');
+                console.error('Failed to block user', error);
+                return null;
             }
         }
     }

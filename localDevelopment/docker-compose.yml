@@ -1,0 +1,58 @@
+services:
+  db:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: focused-local-db
+    restart: unless-stopped
+    env_file:
+      - .env.example # copy to .env locally to override without touching git
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - focused-local-db-data:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "127.0.0.1",
+          "-u",
+          "root",
+          "-p${MYSQL_ROOT_PASSWORD:-root}",
+          "--silent",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # One-shot container that pushes prisma/schema.prisma onto the running
+  # `db` service and loads mock data from ./seed/data. It exits once done —
+  # it is not a long-running server.
+  seed:
+    build:
+      context: ..
+      dockerfile: localDevelopment/seed/Dockerfile
+    container_name: focused-local-seed
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env.example
+    environment:
+      # Overrides the .env values with the compose network hostname `db`
+      # (not localhost/127.0.0.1, which only works from your host machine).
+      # DATABASE_URL is used by `prisma db push`; the discrete DATABASE_*
+      # vars are used by seed.ts's PrismaMariaDb adapter, matching
+      # src/db/client.ts's runtime configuration.
+      DATABASE_URL: "mysql://${MYSQL_USER:-focused}:${MYSQL_PASSWORD:-focused}@db:3306/${MYSQL_DATABASE:-focused_dev}"
+      DATABASE_HOST: db
+      DATABASE_USER: "${MYSQL_USER:-focused}"
+      DATABASE_PASSWORD: "${MYSQL_PASSWORD:-focused}"
+      DATABASE_NAME: "${MYSQL_DATABASE:-focused_dev}"
+      DATABASE_PORT: 3306
+
+volumes:
+  focused-local-db-data:
