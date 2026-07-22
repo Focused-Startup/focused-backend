@@ -49,7 +49,7 @@ npx prisma generate
 ### 5. Run database migrations
 
 ```bash
-npx prisma migrate deploy
+npx prisma migrate dev
 ```
 
 ### 6. Build the app
