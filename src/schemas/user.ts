@@ -10,6 +10,7 @@ export const userTypeDefs = `#graphql
       lastName: String
       createdAt: DateTime!
       updatedAt: DateTime!
+      feeling: String
       notes: [Note!]!
       goals: [Goal!]!
       relationshipsAsUser: [UserRelationship!]!
@@ -32,7 +33,7 @@ export const userTypeDefs = `#graphql
     type Mutation {
         regUser(username: String!, email: String!): User
         loginUser(email: String!): User
-        updateUser(id: Int!, username: String, email: String, firstName: String, lastName: String): User
+        updateUser(id: Int!, username: String, email: String, firstName: String, lastName: String, feeling: String): User
         deleteUser(id: Int!): deleteResponse!
     }
 

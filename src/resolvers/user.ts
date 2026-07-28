@@ -6,6 +6,7 @@ interface Args {
     email: string;
     firstName: string;
     lastName: string;
+    feeling: string;
 }
 
 export const UsersResolvers = {
@@ -103,7 +104,7 @@ export const UsersResolvers = {
             }
         },
         updateUser: async (_: any, args: Args) => {
-            const { id, username, email, firstName, lastName } = args;
+            const { id, username, email, firstName, lastName, feeling } = args;
             try {
                 return await prisma.user.update({
                     where: { id },
@@ -112,6 +113,7 @@ export const UsersResolvers = {
                         email,
                         firstName,
                         lastName,
+                        feeling,
                         updatedAt: new Date()
                     }
                 });
