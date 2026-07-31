@@ -10,6 +10,7 @@ type User {
   lastName: String
   createdAt: DateTime!
   updatedAt: DateTime!
+  feeling: String
   notes: [Note!]!
   goals: [Goal!]!
   relationshipsAsUser: [UserRelationship!]!
@@ -44,13 +45,13 @@ type usersInfoResponse {
 type Mutation {
   regUser(username: String!, email: String!): User
   loginUser(email: String!): User
-  updateUser(id: Int!, username: String, email: String, firstName: String, lastName: String): User
+  updateUser(id: Int!, username: String, email: String, firstName: String, lastName: String, feeling: String): User
   deleteUser(id: Int!): deleteResponse!
   addNote(content: String!, authorId: Int!): Note
   updateNote(id: Int!, content: String): Note
   deleteNote(id: Int!): deleteResponse!
   addGoal(content: String!, userId: Int!, dueDate: DateTime!): Goal
-  updateGoal(id: Int!, content: String, dueDate: DateTime): Goal
+  updateGoal(id: Int!, content: String, dueDate: DateTime, status: GoalStatus): Goal
   deleteGoal(id: Int!): deleteResponse!
   sendFriendRequest(userId: Int!, targetUserId: Int!): UserRelationship
   respondToFriendRequest(userId: Int!, targetUserId: Int!, accept: Boolean!): UserRelationship
