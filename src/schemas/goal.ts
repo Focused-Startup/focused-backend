@@ -29,7 +29,7 @@ export const goalTypeDefs = `#graphql
 
     type Mutation {
         addGoal(content: String!, userId: Int!, dueDate: DateTime!): Goal
-        updateGoal(id: Int!, content: String, dueDate: DateTime): Goal
+        updateGoal(id: Int!, content: String, dueDate: DateTime, status: GoalStatus): Goal
         deleteGoal(id: Int!): deleteResponse!
     }
 

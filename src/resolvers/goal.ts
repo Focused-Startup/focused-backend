@@ -1,10 +1,12 @@
 import prisma from '../db/client';
+import { GoalStatus } from '../generated/prisma/browser';
 
 interface GoalArgs {
     id: number;
     content: string;
     userId: number;
     dueDate: Date;
+    status: GoalStatus;
 }
 
 export const GoalsResolvers = {
@@ -41,11 +43,11 @@ export const GoalsResolvers = {
             }
         },
         updateGoal: async (_: any, args: GoalArgs) => {
-            const { id, content, dueDate } = args;
+            const { id, content, dueDate, status } = args;
             try {
                 return await prisma.goal.update({
                     where: { id },
-                    data: { content, dueDate, updatedAt: new Date() }
+                    data: { content, dueDate, status, updatedAt: new Date() }
                 });
             } catch (error) {
                 console.error(`Error updating goal with id ${id}:`, error);
