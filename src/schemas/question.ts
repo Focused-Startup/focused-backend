@@ -2,6 +2,7 @@ export const questionTypeDefs = `#graphql
     type Question {
       id: Int!
       authorId: Int!
+      authorName: String
       body: String
       createdAt: DateTime!
       updatedAt: DateTime!
