@@ -11,7 +11,12 @@ export const QuestionsResolvers = {
         // Field resolver: fetches responses for a question only when the `responses` field is queried
         responses: async (parent: { id: number }) => {
             return prisma.response.findMany({ where: { questionId: parent.id } });
-        }
+        },
+        // Field resolver: fetches the author's name for a question only when the `authorName` field is queried
+        authorName: async (parent: { authorId: number }) => {
+            const user = await prisma.user.findUnique({ where: { id: parent.authorId } });
+            return user ? user.username : null;
+        },
     },
     Query: {
         questions: async () => {
