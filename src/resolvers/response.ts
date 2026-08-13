@@ -9,10 +9,40 @@ interface ResponseArgs {
 
 export const ResponsesResolvers = {
     Query: {
-        responses: async () => {
+        responses: async (_: any, args: ResponseArgs) => {
+            const { questionId, authorId } = args;
             try {
-                const responses = await prisma.response.findMany();
+                if (questionId === undefined && authorId === undefined) {
+                    throw new Error('At least one of questionId or authorId must be provided');
+                }
+
+                if (questionId !== undefined && authorId !== undefined) {
+                    const responses = await prisma.response.findMany({
+                        where: {
+                            questionId: questionId,
+                            authorId: authorId
+                        }
+                    });
+                    return { success: true, total: responses.length, responses };
+                }
+
+                if (questionId !== undefined) {
+                const responses = await prisma.response.findMany({
+                    where: {
+                        questionId: questionId
+                    }
+                });
                 return { success: true, total: responses.length, responses };
+                }
+
+                if (authorId !== undefined) {
+                    const responses = await prisma.response.findMany({
+                        where: {
+                            authorId: authorId
+                        }
+                    });
+                    return { success: true, total: responses.length, responses };
+                }
             } catch (error) {
                 console.error('Error fetching responses:', error);
                 return { success: false, total: 0, responses: [] };

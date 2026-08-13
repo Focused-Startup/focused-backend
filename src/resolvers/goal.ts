@@ -11,9 +11,10 @@ interface GoalArgs {
 
 export const GoalsResolvers = {
     Query: {
-        goals: async () => {
+        goals: async (_: any, args: GoalArgs) => {
+            const { userId } = args;
             try {
-                const goals = await prisma.goal.findMany();
+                const goals = await prisma.goal.findMany({ where: { userId } });
                 return { success: true, total: goals.length, goals };
             } catch (error) {
                 console.error('Error fetching goals:', error);

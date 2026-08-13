@@ -9,7 +9,7 @@ export const responseTypeDefs = `#graphql
     }
 
     type Query {
-        responses: ResponsesInfoResponse
+        responses(questionId: Int, authorId: Int): ResponsesInfoResponse
         response(id: Int!): Response
     }
 

@@ -41,7 +41,30 @@ export const UsersResolvers = {
         },
         // Field resolver: fetches questions for a user only when the `questions` field is queried
         questions: async (parent: { id: number }) => {
-            return prisma.question.findMany({ where: { authorId: parent.id } });
+            const friendIdsRaw = await prisma.userRelationship.findMany({
+                where: {
+                    OR: [
+                        { userId: parent.id },
+                        { targetUserId: parent.id }
+                    ],
+                    AND: { status: 'accepted' }
+                },
+                select: {
+                    userId: true,
+                    targetUserId: true
+                }
+            });
+
+            const friendIds = friendIdsRaw.map(rel => rel.userId === parent.id ? rel.targetUserId : rel.userId);
+
+            return prisma.question.findMany({ 
+                where: { 
+                    OR: [
+                        { authorId: parent.id },
+                        { authorId: { in: friendIds } }
+                    ]
+                } 
+            });
         }
     },
     Query: {

@@ -75,6 +75,7 @@ optionally seed it with mock data. All of this lives under `localDevelopment/`.
 ```bash
 cd localDevelopment
 cp .env.example .env   # optional: override default local credentials/ports
+docker compose build
 docker compose up -d db
 ```
 
@@ -114,6 +115,12 @@ service and then inserts the fixtures from `localDevelopment/seed/data/`
 
 You can now run `npm run start` from the project root as usual, and the
 backend will read/write against your local, seeded database.
+
+To see your seeded data in the database run:
+
+```bash
+npx prisma studio
+```
 
 ### Stopping / resetting
 

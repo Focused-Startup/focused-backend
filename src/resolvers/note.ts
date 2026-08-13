@@ -8,9 +8,10 @@ interface NoteArgs {
 
 export const NotesResolvers = {
     Query: {
-        notes: async () => {
+        notes: async (_: any, args: NoteArgs) => {
+            const { authorId } = args;
             try {
-                const notes = await prisma.note.findMany();
+                const notes = await prisma.note.findMany({ where: { authorId } });
                 return { success: true, total: notes.length, notes };
             } catch (error) {
                 console.error('Error fetching notes:', error);

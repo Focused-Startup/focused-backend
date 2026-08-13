@@ -17,7 +17,7 @@ export const goalTypeDefs = `#graphql
     }
 
     type Query {
-        goals: GoalsInfoResponse!
+        goals(userId: Int!): GoalsInfoResponse!
         goal(id: Int!): Goal
     }
 

@@ -8,7 +8,7 @@ export const noteTypeDefs = `#graphql
     }
 
     type Query {
-        notes: notesInfoResponse
+        notes(authorId: Int!): notesInfoResponse
         note(id: Int!): Note
     }
 

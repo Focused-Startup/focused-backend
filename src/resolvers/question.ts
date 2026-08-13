@@ -19,9 +19,10 @@ export const QuestionsResolvers = {
         },
     },
     Query: {
-        questions: async () => {
+        questions: async (_: any, args: QuestionArgs) => {
             try {
-                const questions = await prisma.question.findMany();
+                const { authorId } = args;
+                const questions = await prisma.question.findMany({ where: { authorId } });
                 return { success: true, total: questions.length, questions };
             } catch (error) {
                 console.error('Error fetching questions:', error);

@@ -10,7 +10,7 @@ export const questionTypeDefs = `#graphql
     }
 
     type Query {
-        questions: QuestionsInfoResponse
+        questions(authorId: Int!): QuestionsInfoResponse
         question(id: Int!): Question
     }
 
