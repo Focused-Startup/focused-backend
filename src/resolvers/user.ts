@@ -68,9 +68,31 @@ export const UsersResolvers = {
         }
     },
     Query: {
-        users: async () => {
+        friends: async (_: any, args: { id: number }) => {
+            const { id } = args;
             try {
-                const users = await prisma.user.findMany();
+                const relationships = await prisma.userRelationship.findMany({
+                    where: {
+                        OR: [
+                            { userId: id },
+                            { targetUserId: id }
+                        ],
+                        AND: { status: 'accepted' }
+                    },
+                    select: {
+                        userId: true,
+                        targetUserId: true
+                    }
+                });
+
+                const friendIds = relationships.map(rel => rel.userId === id ? rel.targetUserId : rel.userId);
+
+                const users = await prisma.user.findMany({
+                    where: {
+                        id: { in: friendIds }
+                    }
+                });
+
                 return { success: true, total: users.length, users };
             } catch (error) {
                 console.error('Error fetching users:', error);
