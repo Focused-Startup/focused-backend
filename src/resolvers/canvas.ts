@@ -1,4 +1,5 @@
 import prisma from '../db/client';
+import type { PrismaClient } from '../generated/prisma/client';
 import { PubSub, withFilter } from 'graphql-subscriptions';
 
 const pubsub = new PubSub();
@@ -8,6 +9,29 @@ interface CanvasArgs {
     ownerId?: number;
     visibility: 'private' | 'friends' | 'public';
     drawingData: any; // Assuming JSON type for drawing data
+}
+
+export async function ensureCanvas(client: Pick<PrismaClient, '$transaction'>, ownerId: number) {
+    return client.$transaction(async (tx) => {
+        // Serialize provisioning for this owner without changing the existing one-to-many schema.
+        const owners = await tx.$queryRaw<{ user_id: number }[]>`
+            SELECT user_id FROM users WHERE user_id = ${ownerId} FOR UPDATE
+        `;
+        if (owners.length === 0) {
+            throw new Error('Canvas owner not found');
+        }
+
+        const canvas = await tx.canvas.findFirst({ where: { ownerId } });
+        if (canvas) return canvas;
+
+        return tx.canvas.create({
+            data: {
+                ownerId,
+                visibility: 'private',
+                drawingData: { version: 1, canvasSize: 4000, strokes: [] },
+            },
+        });
+    });
 }
 
 export const CanvasesResolvers = {
@@ -55,6 +79,7 @@ export const CanvasesResolvers = {
         }
     },
     Mutation: {
+        ensureCanvas: (_: unknown, { ownerId }: { ownerId: number }) => ensureCanvas(prisma, ownerId),
         addCanvas: async (_: any, args: CanvasArgs) => {
             const { ownerId, visibility, drawingData } = args;
             try {

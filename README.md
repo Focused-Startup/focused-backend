@@ -132,6 +132,11 @@ docker compose down -v     # stop containers and wipe the local database
 
 ## Available Scripts
 
+The `ensureCanvas(ownerId)` mutation used at sign-in returns an existing owned
+canvas or creates a private, empty version 1 canvas. Concurrent calls through
+this mutation serialize on the owner row; existing canvases are not changed.
+Deploy this API change before deploying the frontend that calls it.
+
 | Script | Description |
 |---|---|
 | `npm run start` | Start the server with `tsx` |

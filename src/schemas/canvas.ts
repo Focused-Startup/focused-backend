@@ -29,6 +29,7 @@ export const canvasTypeDefs = `#graphql
 
     type Mutation {
         addCanvas(ownerId: Int!, visibility: CanvasVisibility!, drawingData: JSON): Canvas
+        ensureCanvas(ownerId: Int!): Canvas!
         updateCanvas(id: Int!, visibility: CanvasVisibility, drawingData: JSON): Canvas
         deleteCanvas(id: Int!): deleteResponse!
     }
