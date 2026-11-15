@@ -137,6 +137,11 @@ canvas or creates a private, empty version 1 canvas. Concurrent calls through
 this mutation serialize on the owner row; existing canvases are not changed.
 Deploy this API change before deploying the frontend that calls it.
 
+`canvasUpdated(canvasId)` sends the current canvas on subscription and later
+committed updates from this server process. `saveCanvas` checks `updatedAt`
+under a row lock and rejects stale drawing updates without overwriting them.
+The in-memory subscription bus does not deliver updates across server processes.
+
 | Script | Description |
 |---|---|
 | `npm run start` | Start the server with `tsx` |

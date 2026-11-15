@@ -1,6 +1,6 @@
 import prisma from '../db/client';
-import type { PrismaClient } from '../generated/prisma/client';
-import { PubSub, withFilter } from 'graphql-subscriptions';
+import type { Prisma, PrismaClient } from '../generated/prisma/client';
+import { PubSub } from 'graphql-subscriptions';
 
 const pubsub = new PubSub();
 
@@ -32,6 +32,82 @@ export async function ensureCanvas(client: Pick<PrismaClient, '$transaction'>, o
             },
         });
     });
+}
+
+type CanvasUpdate = {
+    id: number;
+    drawingData?: Prisma.InputJsonValue;
+    visibility?: 'private' | 'friends' | 'public';
+    expectedUpdatedAt?: Date;
+};
+
+export async function writeCanvas(client: Pick<PrismaClient, '$transaction'>, update: CanvasUpdate) {
+    return client.$transaction(async (tx) => {
+        const rows = await tx.$queryRaw<{ canvas_id: number }[]>`
+            SELECT canvas_id FROM canvases WHERE canvas_id = ${update.id} FOR UPDATE
+        `;
+        if (rows.length === 0) throw new Error('Canvas not found');
+        const current = await tx.canvas.findUniqueOrThrow({ where: { id: update.id } });
+        if (update.expectedUpdatedAt && current.updatedAt.getTime() !== update.expectedUpdatedAt.getTime()) {
+            return { applied: false, canvas: current };
+        }
+        const updatedAt = new Date(Math.max(Date.now(), current.updatedAt.getTime() + 1));
+        const canvas = await tx.canvas.update({
+            where: { id: update.id },
+            data: { drawingData: update.drawingData, visibility: update.visibility, updatedAt },
+        });
+        return { applied: true, canvas };
+    });
+}
+
+export async function saveCanvas(
+    client: Pick<PrismaClient, '$transaction'>,
+    eventsBus: PubSub,
+    args: { id: number; expectedUpdatedAt: string; drawingData: Prisma.InputJsonValue },
+) {
+    const expectedUpdatedAt = new Date(args.expectedUpdatedAt);
+    if (Number.isNaN(expectedUpdatedAt.getTime())) throw new Error('Invalid canvas revision');
+    const result = await writeCanvas(client, { ...args, expectedUpdatedAt });
+    if (result.applied) await eventsBus.publish('CANVAS_UPDATED', { canvasUpdated: result.canvas });
+    return result;
+}
+
+export function subscribeCanvas(client: Pick<PrismaClient, 'canvas'>, eventsBus: PubSub, canvasId: number) {
+    const events = eventsBus.asyncIterableIterator<{ canvasUpdated: { id: number } }>('CANVAS_UPDATED');
+    let pending = events.next();
+    let initial = true;
+    let closed = false;
+    return {
+        async next() {
+            if (closed) return { done: true as const, value: undefined };
+            if (initial) {
+                initial = false;
+                try {
+                    const canvas = await client.canvas.findUnique({ where: { id: canvasId } });
+                    if (!canvas) throw new Error('Canvas not found');
+                    if (closed) return { done: true as const, value: undefined };
+                    return { done: false as const, value: { canvasUpdated: canvas } };
+                } catch (error) {
+                    closed = true;
+                    await events.return?.();
+                    throw error;
+                }
+            }
+            while (!closed) {
+                const event = await pending;
+                if (event.done || closed) return { done: true as const, value: undefined };
+                pending = events.next();
+                if (event.value.canvasUpdated.id === canvasId) return event;
+            }
+            return { done: true as const, value: undefined };
+        },
+        async return() {
+            closed = true;
+            await events.return?.();
+            return { done: true as const, value: undefined };
+        },
+        [Symbol.asyncIterator]() { return this; },
+    };
 }
 
 export const CanvasesResolvers = {
@@ -80,6 +156,8 @@ export const CanvasesResolvers = {
     },
     Mutation: {
         ensureCanvas: (_: unknown, { ownerId }: { ownerId: number }) => ensureCanvas(prisma, ownerId),
+        saveCanvas: (_: unknown, args: { id: number; expectedUpdatedAt: string; drawingData: Prisma.InputJsonValue }) =>
+            saveCanvas(prisma, pubsub, args),
         addCanvas: async (_: any, args: CanvasArgs) => {
             const { ownerId, visibility, drawingData } = args;
             try {
@@ -100,16 +178,10 @@ export const CanvasesResolvers = {
         updateCanvas: async (_: any, args: CanvasArgs) => {
             const { id, visibility, drawingData } = args;
             try {
-                const updatedAt = new Date();
-                pubsub.publish('CANVAS_UPDATED', { canvasUpdated: { id, visibility, drawingData, updatedAt } });
-                return await prisma.canvas.update({
-                    where: { id },
-                    data: {
-                        visibility: visibility || undefined,
-                        drawingData: drawingData || undefined,
-                        updatedAt: updatedAt
-                    }
-                });
+                if (id === undefined) throw new Error('Canvas ID is required');
+                const result = await writeCanvas(prisma, { id, visibility, drawingData });
+                await pubsub.publish('CANVAS_UPDATED', { canvasUpdated: result.canvas });
+                return result.canvas;
             } catch (error) {
                 console.error('Error updating canvas:', error);
                 return null;
@@ -127,13 +199,7 @@ export const CanvasesResolvers = {
     },
     Subscription: {
         canvasUpdated: {
-            subscribe: withFilter(
-                () => pubsub.asyncIterableIterator('CANVAS_UPDATED'),
-                (payload, variables) => {
-                    // Add your filtering logic here if needed
-                    return payload.canvasUpdated.id === variables.canvasId;
-                }
-            )
+            subscribe: (_: unknown, { canvasId }: { canvasId: number }) => subscribeCanvas(prisma, pubsub, canvasId),
         }
     }
 }
