@@ -137,10 +137,15 @@ canvas or creates a private, empty version 1 canvas. Concurrent calls through
 this mutation serialize on the owner row; existing canvases are not changed.
 Deploy this API change before deploying the frontend that calls it.
 
-`canvasUpdated(canvasId)` sends the current canvas on subscription and later
-committed updates from this server process. `saveCanvas` checks `updatedAt`
-under a row lock and rejects stale drawing updates without overwriting them.
-The in-memory subscription bus does not deliver updates across server processes.
+Canvas live synchronization uses raw WebSockets at `/canvas-sync` (separate
+from the GraphQL HTTP endpoint). Clients send
+`{"type":"subscribe","canvasId":<id>}` and receive a `snapshot` followed by
+`update` messages with the public canvas revision fields (`id`, `drawingData`,
+and `updatedAt`); malformed requests and lookup failures receive an `error`
+message. Reconnecting clients should subscribe again to get a fresh snapshot.
+`saveCanvas` checks `updatedAt` under a row lock and rejects stale drawing
+updates without overwriting them. Broadcasts are in-process, so updates are not
+shared between multiple backend processes.
 
 | Script | Description |
 |---|---|
@@ -148,6 +153,7 @@ The in-memory subscription bus does not deliver updates across server processes.
 | `npm run typecheck` | Run TypeScript type checking |
 | `npm run lint` | Lint the `src/` directory |
 | `npm run lint:fix` | Auto-fix lint errors |
+| `npm test` | Run canvas save and WebSocket synchronization tests with `tsx` |
 
 ## Project Structure
 
