@@ -7,9 +7,10 @@ import { createServer} from 'http';
 import cors from 'cors';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { WebSocketServer } from 'ws';
-import { useServer } from 'graphql-ws/use/ws';
 import { typeDefs } from './schemas';
 import { resolvers } from './resolvers';
+import { canvasSyncHub } from './services/canvasSyncHub';
+import { closeCanvasSyncServer } from './services/canvasSync';
 
 // Required logic for integrating with Express
 const app = express();
@@ -48,17 +49,21 @@ const localCorsOptions: cors.CorsOptions = {
 
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 
-// Creating the WebSocket server
+// Canvas collaboration uses a small JSON protocol, not GraphQL-over-WebSocket.
+// Browser origins follow the HTTP allow-list; native clients commonly omit Origin.
 const wsServer = new WebSocketServer({
   server: httpServer,
-  // Same path as the HTTP GraphQL endpoint so clients only need one URL.
-  // Node.js routes WS upgrades and regular HTTP requests separately,
-  // so there is no conflict with the Express middleware on '/'.
-  path: '/',
+  path: '/canvas-sync',
+  maxPayload: 16 * 1024,
+  verifyClient: ({ origin }, callback) => {
+    if (!origin || process.env.LOCAL || allowedOrigins.includes(origin)) {
+      callback(true);
+      return;
+    }
+    callback(false, 403, 'Origin not allowed');
+  },
 });
-// Hand in the schema we just created and have the
-// WebSocketServer start listening.
-const serverCleanup = useServer({ schema }, wsServer);
+wsServer.on('connection', (socket) => canvasSyncHub.attach(socket));
 
 // Same ApolloServer initialization as before, plus the drain plugin
 // for our httpServer.
@@ -70,7 +75,7 @@ const server = new ApolloServer({
       async serverWillStart() {
         return {
           async drainServer() {
-            await serverCleanup.dispose();
+            await closeCanvasSyncServer(wsServer);
           },
         };
       },

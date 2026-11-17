@@ -40,7 +40,4 @@ export const canvasTypeDefs = `#graphql
         deleteCanvas(id: Int!): deleteResponse!
     }
 
-    type Subscription {
-        canvasUpdated(canvasId: Int!): Canvas
-    }
 `;
